@@ -1,0 +1,437 @@
+swagger: '2.0'
+info:
+  description: Golem Brass Gateway API for Golem Unlimited
+  version: 1.0.0
+  title: Golem Gateway API
+  license:
+    name: GPL 3.0
+    url: 'https://www.gnu.org/licenses/gpl-3.0.html'
+host: 127.0.0.1:55001
+schemes:
+  - http
+definitions:
+  NodeId: &NodeId
+    type: string
+    pattern: '0x[0-9a-fA-F]{40}'
+    description: >
+      ethereum address identifying node e.g.,
+      `0x1ca0fd52dd8d0abf3a577f5b4645806f774f2f7b`
+  Uuid: &Uuid
+    type: string
+    format: uuid
+    pattern: '[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}'
+  TaskType: &TaskType
+    type: string
+    enum:
+      - Blender
+      - Transcoding
+  Message:
+    required:
+      - msg
+    properties:
+      msg:
+        type: string
+  Subscription:
+    required:
+      - minPrice
+      - maxCpuCores
+      - maxMemorySize
+      - maxDiskSize
+    properties:
+      name:
+        type: string
+      minPrice:
+        type: integer
+        description: minimal accepted price in 10e-18 GNT
+      performance:
+        type: integer
+        format: float
+      maxCpuCores:
+        type: integer
+      maxMemorySize:
+        type: integer
+        description: max available RAM in KiB
+      maxDiskSize:
+        type: integer
+        description: max available disk in KiB
+      ethPubKey:
+        type: string
+        pattern: '[0-9a-fA-F]{128}'
+        description: >
+          ethereum public key which will be used to
+          obtain eth address for payments (as hex wo `0x` prefix)
+  SubscriptionStatus:
+    required:
+      - nodeId
+      - taskType
+    properties:
+      nodeId:
+        $ref: '#/definitions/NodeId'
+      taskType:
+        $ref: '#/definitions/TaskType'
+      subscription:
+        $ref: '#/definitions/Subscription'
+      subtaskStats:
+        properties:
+          requested:
+            type: integer
+          started:
+            type: integer
+          cancelled:
+            type: integer
+          succeded:
+            type: integer
+          failed:
+            type: integer
+          timedout:
+            type: integer
+  Task:
+    description: >
+      A basic unit of work requested in Golem Network.
+      Upon computation it is divided into a smaller chunks - subtasks.
+      Number of subtasks is defined by the requestor.
+    required:
+      - taskId
+      - deadline
+      - subtaskTimeout
+      - subtasksCount
+      - maxPrice
+    properties:
+      taskId:
+        $ref: '#/definitions/Uuid'
+      deadline:
+        type: integer
+        description: >
+          timestamp when computation must be finished
+          to be accepted by a requestor
+      subtaskTimeout:
+        type: integer
+        format: int64
+      subtasksCount:
+        type: integer
+        format: int64
+      resourceSize:
+        type: integer
+        format: int64
+      estimatedMemory:
+        type: integer
+        format: int64
+      maxPrice:
+        type: integer
+        format: int64
+        description: in 10e-18 GNT per second of computation
+      minVersion:
+        type: string
+        description: minimal Golem version
+    additionalProperties: true
+  Subtask:
+    description: >
+      Subtask is a part of task supossed to be executed by a provider,
+      which submited task computation willingness.
+    required:
+      - taskId
+      - subtaskId
+      - price
+      - deadline
+    properties:
+      taskId:
+        $ref: '#/definitions/Uuid'
+      subtaskId:
+        $ref: '#/definitions/Uuid'
+      price:
+        type: integer
+        format: int64
+        description: >
+          total subtask price in 10e-18 GNT computed as `task_max_price * subtask_timeout`
+      deadline:
+        type: integer
+        description: >
+          timestamp when computation must be finished
+          to be accepted by a requestor
+      dockerImages:
+        type: array
+        items:
+          required:
+            - repository
+            - tag
+          properties:
+            repository:
+              type: string
+            image_id:
+              type: string
+            tag:
+              type: string
+    additionalProperties: true
+  Resource:
+    description: Binary content (files) required to execute subtask
+    required:
+      - taskId
+      - subtaskId
+      - path
+    properties:
+      taskId:
+        $ref: '#/definitions/Uuid'
+      subtaskId:
+        $ref: '#/definitions/Uuid'
+      path:
+        type: string
+  SubtaskResult:
+    description: Subtask computation result
+    required:
+      - status
+      - path
+    properties:
+      status:
+        type: string
+        enum:
+          - success
+          - failure
+      reason:
+        type: string
+        description: failure reason
+      path:
+        type: string
+  SubtaskVerification:
+    description: Subtask verification result
+    required:
+      - taskId
+      - subtaskId
+      - verificationResult
+    properties:
+      taskId:
+        $ref: '#/definitions/Uuid'
+      subtaskId:
+        $ref: '#/definitions/Uuid'
+      verificationResult:
+        type: string
+        enum:
+          - OK
+          - failed
+      paymentTs:
+        type: integer
+      reason:
+        type: string
+  Event:
+    type: object
+    required:
+      - eventId
+    properties:
+      eventId:
+        $ref: '#/definitions/Uuid'
+      task:
+        $ref: '#/definitions/Task'
+      subtask:
+        $ref: '#/definitions/Subtask'
+      resource:
+        $ref: '#/definitions/Resource'
+      subtaskVerification:
+        $ref: '#/definitions/SubtaskVerification'
+    
+  Events:
+    description: >
+      Events array.
+      Every item has id and exactly one of remaining fields filled.
+    type: array
+    items:
+      $ref: '#/definitions/Event'
+parameters:
+  nodeId:
+    name: nodeId
+    in: path
+    required: true
+    <<: *NodeId
+  taskType:
+    name: taskType
+    in: path
+    required: true
+    <<: *TaskType
+  taskId:
+    name: taskId
+    in: path
+    required: true
+    <<: *Uuid
+  subtaskId:
+    name: subtaskId
+    in: path
+    required: true
+    <<: *Uuid
+paths:
+  '/subscriptions/{nodeId}':
+    parameters:
+      - $ref: '#/parameters/nodeId'
+    get:
+      summary: Gets all subscriptions for node
+      operationId: all_subscriptions
+      responses:
+        '200':
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: '#/definitions/SubscriptionStatus'
+        '404':
+          description: subscription not found
+          schema:
+            $ref: '#/definitions/Message'
+  '/subscriptions/{nodeId}/{taskType}':
+    parameters:
+      - $ref: '#/parameters/nodeId'
+      - $ref: '#/parameters/taskType'
+    put:
+      summary: Creates or amends subscription to Golem network
+      operationId: subscribe
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/Subscription'
+      responses:
+        '200':
+          description: subscription amended
+          schema:
+            $ref: '#/definitions/SubscriptionStatus'
+        '201':
+          description: subscription created
+          schema:
+            $ref: '#/definitions/SubscriptionStatus'
+        '400':
+          description: invalid input
+          schema:
+            $ref: '#/definitions/Message'
+    get:
+      summary: Gets single subscription details
+      operationId: subscription
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/SubscriptionStatus'
+        '404':
+          description: subscription not found
+          schema:
+            $ref: '#/definitions/Message'
+    delete:
+      summary: Removes subscription
+      operationId: unsubscribe
+      responses:
+        '200':
+          description: subscription deleted
+          schema:
+            $ref: '#/definitions/Message'
+        '404':
+          description: subscription not found
+          schema:
+            $ref: '#/definitions/Message'
+  '/{nodeId}/tasks/{taskId}':
+    parameters:
+      - $ref: '#/parameters/nodeId'
+      - $ref: '#/parameters/taskId'
+    post:
+      summary: Sends task computation willingness
+      operationId: wantToComputeTask
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Message'
+    get:
+      summary: Gets task information
+      operationId: taskInfo
+      responses:
+        '200':
+          description: task definition
+          schema:
+            $ref: '#/definitions/Task'
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/Message'
+  '/{nodeId}/subtasks/{subtaskId}':
+    parameters:
+      - $ref: '#/parameters/nodeId'
+      - $ref: '#/parameters/subtaskId'
+    put:
+      summary: Confirms subtask computation start
+      operationId: confirmSubtask
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Message'
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/Message'
+    get:
+      summary: Gets subtask information
+      operationId: subtaskInfo
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Subtask'
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/Message'
+    post:
+      summary: Reports subtask computation result
+      description: >
+        In case of successful computation caller need upload resource
+        with subtask outputs first, and supply relative path here.
+
+        Reason is supplied only in case of failure.
+      operationId: subtaskResult
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/SubtaskResult'
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Message'
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/Message'
+        '410':
+          description: subtask timed out
+          schema:
+            $ref: '#/definitions/Message'
+  '/{nodeId}/subtasks/{subtaskId}/cancel':
+    parameters:
+      - $ref: '#/parameters/nodeId'
+      - $ref: '#/parameters/subtaskId'
+    post:
+      summary: Cancels subtask computation (upon failure or resignation)
+      operationId: cancelSubtask
+      responses:
+        '200':
+          description: OK
+          schema:
+            $ref: '#/definitions/Message'
+        '404':
+          description: not found
+          schema:
+            $ref: '#/definitions/Message'
+  '/{nodeId}/{taskType}/events':
+    parameters:
+      - $ref: '#/parameters/nodeId'
+      - $ref: '#/parameters/taskType'
+      - name: lastEventId
+        in: query
+        description: provide event id from previous call
+        type: integer
+        format: int64
+    get:
+      summary: List events for given node id and task type; starting after last event id
+      operationId: fetchEvents
+      responses:
+        '200':
+          description: list of events from `lastEventId`
+          schema:
+            $ref: '#/definitions/Events'
