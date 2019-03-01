@@ -1,4 +1,4 @@
-# Rust API client for golem_gw_api
+# Rust API client for golem_gw_api [![Build Status](https://travis-ci.com/prekucki/golem-gw-client.svg?branch=master)](https://travis-ci.com/prekucki/golem-gw-client)
 
 Golem Brass Gateway API for Golem Unlimited
 
