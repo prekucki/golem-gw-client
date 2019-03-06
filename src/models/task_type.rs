@@ -13,23 +13,7 @@
 use serde_json::Value;
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct TaskType {
+pub enum TaskType {
+  Blender,
+  Transcoding,
 }
-
-impl TaskType {
-  pub fn new() -> TaskType {
-    TaskType {
-    }
-  }
-
-}
-
-// TODO enum 
-// List of TaskType
-//const (
-//  
-//  
-//  
-//)
-
-

@@ -20,7 +20,7 @@ pub struct Subscription {
   #[serde(rename = "minPrice")]
   min_price: i32,
   #[serde(rename = "performance")]
-  performance: Option<i32>,
+  performance: Option<f32>,
   #[serde(rename = "maxCpuCores")]
   max_cpu_cores: i32,
   /// max available RAM in KiB
@@ -78,16 +78,16 @@ impl Subscription {
   }
 
 
-  pub fn set_performance(&mut self, performance: i32) {
+  pub fn set_performance(&mut self, performance: f32) {
     self.performance = Some(performance);
   }
 
-  pub fn with_performance(mut self, performance: i32) -> Subscription {
+  pub fn with_performance(mut self, performance: f32) -> Subscription {
     self.performance = Some(performance);
     self
   }
 
-  pub fn performance(&self) -> Option<&i32> {
+  pub fn performance(&self) -> Option<&f32> {
     self.performance.as_ref()
   }
 

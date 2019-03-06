@@ -5,7 +5,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **String** |  | [optional] 
 **min_price** | **i32** | minimal accepted price in 10e-18 GNT | 
-**performance** | **i32** |  | [optional] 
+**performance** | **f32** |  | [optional] 
 **max_cpu_cores** | **i32** |  | 
 **max_memory_size** | **i32** | max available RAM in KiB | 
 **max_disk_size** | **i32** | max available disk in KiB | 
