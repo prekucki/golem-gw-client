@@ -9,11 +9,11 @@
  */
 
 use hyper;
-use std::collections::HashMap;
+use hyper::header::HeaderValue;
 
-pub struct Configuration<C: hyper::client::Connect> {
+pub struct Configuration<C: 'static + hyper::client::connect::Connect + 'static> {
   pub base_path: String,
-  pub user_agent: Option<String>,
+  pub user_agent: Option<HeaderValue>,
   pub client: hyper::client::Client<C>,
   pub basic_auth: Option<BasicAuth>,
   pub oauth_access_token: Option<String>,
@@ -28,12 +28,12 @@ pub struct ApiKey {
   pub key: String,
 }
 
-impl<C: hyper::client::Connect> Configuration<C> {
+impl<C: 'static + hyper::client::connect::Connect> Configuration<C> {
   pub fn new(client: hyper::client::Client<C>) -> Configuration<C> {
     Configuration {
       base_path: "http://127.0.0.1:55001".to_owned(),
-      user_agent: Some("OpenAPI-Generator/1.0.0/rust".to_owned()),
-      client: client,
+      user_agent: Some(hyper::header::HeaderValue::from_str("OpenAPI-Generator/1.0.0/rust").unwrap()).to_owned(),
+      client,
       basic_auth: None,
       oauth_access_token: None,
       api_key: None,

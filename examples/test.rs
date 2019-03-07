@@ -8,16 +8,11 @@ use tokio_core::reactor::Core;
 use futures::Future;
 
 use hyper::client::Client;
-use hyper::client::HttpConnector;
 use golem_gw_api::models::SubtaskResult;
 
 fn main() {
     let mut event_loop = Core::new().unwrap();
-    let handle = event_loop.handle();
-    let client = Client::configure()
-        .connector(HttpConnector::new(4,&handle))
-        .build(&handle);
-
+    let client = Client::new();
 
     let config = golem_gw_api::apis::configuration::Configuration::new(client);
     let client = golem_gw_api::apis::client::APIClient::new(config);
@@ -66,5 +61,5 @@ fn main() {
 
     let user = event_loop.run(work);
 
-    println!("\n\nEvent loop result:\n {:?}", user);
+    println!("\nEvent loop result:\n {:?}", user);
 }

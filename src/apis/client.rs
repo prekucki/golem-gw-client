@@ -3,12 +3,12 @@ use std::rc::Rc;
 use hyper;
 use super::configuration::Configuration;
 
-pub struct APIClient<C: hyper::client::Connect> {
+pub struct APIClient<C: 'static + hyper::client::connect::Connect> {
   configuration: Rc<Configuration<C>>,
   default_api: Box<::apis::DefaultApi>,
 }
 
-impl<C: hyper::client::Connect> APIClient<C> {
+impl<C: 'static + hyper::client::connect::Connect> APIClient<C> {
   pub fn new(configuration: Configuration<C>) -> APIClient<C> {
     let rc = Rc::new(configuration);
 
