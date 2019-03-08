@@ -11,7 +11,7 @@
 #[allow(unused_imports)]
 use serde_json::Value;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubtaskDockerImages {
     #[serde(rename = "tag")]
     tag: String,
