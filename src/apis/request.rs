@@ -2,12 +2,12 @@ use super::{configuration, Error};
 use futures;
 use futures::{Future, Stream};
 use hyper;
-use hyper::header::{USER_AGENT, CONTENT_TYPE, CONTENT_LENGTH, AUTHORIZATION};
+use hyper::header::{HeaderMap, HeaderName, HeaderValue};
+use hyper::header::{AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT};
 use serde;
 use serde_json;
-use std::str::FromStr;
-use hyper::header::{HeaderMap, HeaderName, HeaderValue};
 use std::collections::HashMap;
+use std::str::FromStr;
 
 pub(crate) struct ApiKey {
     pub in_header: bool,
@@ -64,9 +64,17 @@ impl Request {
         self
     }
 
-    pub fn with_header_param(mut self, basename: String, param: String) -> Result<Self, Error<serde_json::Value>> {
-        let basename = HeaderName::from_str(&basename).map_err(|e| Error::InvalidHeaderName(e) as Error<serde_json::Value>).unwrap();
-        let param = HeaderValue::from_str(&param).map_err(|e| Error::InvalidHeaderValue(e) as Error<serde_json::Value>).unwrap();
+    pub fn with_header_param(
+        mut self,
+        basename: String,
+        param: String,
+    ) -> Result<Self, Error<serde_json::Value>> {
+        let basename = HeaderName::from_str(&basename)
+            .map_err(|e| Error::InvalidHeaderName(e) as Error<serde_json::Value>)
+            .unwrap();
+        let param = HeaderValue::from_str(&param)
+            .map_err(|e| Error::InvalidHeaderValue(e) as Error<serde_json::Value>)
+            .unwrap();
 
         self.header_params.insert(basename, param);
         Ok(self)
@@ -124,38 +132,38 @@ impl Request {
         }
 
         // TODO ?
-//        match self.auth {
-//            Auth::ApiKey(apikey) => {
-//                if let Some(ref key) = conf.api_key {
-//                    let val = apikey.key(&key.prefix, &key.key);
-//                    if apikey.in_query {
-//                        query_string.append_pair(&apikey.param_name, &val);
-//                    }
-//                    if apikey.in_header {
-//                        header_map.insert(apikey.param_name, HeaderValue::from_str(&val));
-//                    }
-//                }
-//            }
-//            Auth::Basic => {
-//                if let Some(ref auth_conf) = conf.basic_auth {
-//                    let auth = hyper::header::Basic {
-//                        username: auth_conf.0.to_owned(),
-//                        password: auth_conf.1.to_owned(),
-//                    };
-//                    header_map.insert(AUTHORIZATION, auth);
-//                }
-//            }
-//            Auth::Oauth => {
-//                if let Some(ref token) = conf.oauth_access_token {
-//                    let auth = hyper::header::Authorization(hyper::header::Bearer {
-//                        token: token.to_owned(),
-//                    });
-//                    header_map.set(AUTHORIZATION, auth);
-//                }
-//            }
-//            Auth::None => {}
-//            _ => {}
-//        }
+        //        match self.auth {
+        //            Auth::ApiKey(apikey) => {
+        //                if let Some(ref key) = conf.api_key {
+        //                    let val = apikey.key(&key.prefix, &key.key);
+        //                    if apikey.in_query {
+        //                        query_string.append_pair(&apikey.param_name, &val);
+        //                    }
+        //                    if apikey.in_header {
+        //                        header_map.insert(apikey.param_name, HeaderValue::from_str(&val));
+        //                    }
+        //                }
+        //            }
+        //            Auth::Basic => {
+        //                if let Some(ref auth_conf) = conf.basic_auth {
+        //                    let auth = hyper::header::Basic {
+        //                        username: auth_conf.0.to_owned(),
+        //                        password: auth_conf.1.to_owned(),
+        //                    };
+        //                    header_map.insert(AUTHORIZATION, auth);
+        //                }
+        //            }
+        //            Auth::Oauth => {
+        //                if let Some(ref token) = conf.oauth_access_token {
+        //                    let auth = hyper::header::Authorization(hyper::header::Bearer {
+        //                        token: token.to_owned(),
+        //                    });
+        //                    header_map.set(AUTHORIZATION, auth);
+        //                }
+        //            }
+        //            Auth::None => {}
+        //            _ => {}
+        //        }
 
         let mut uri_str = format!("{}{}", conf.base_path, path);
 
@@ -179,22 +187,27 @@ impl Request {
         }
 
         let request: hyper::Request<hyper::Body> = if self.form_params.len() > 0 {
-            req.header(CONTENT_TYPE, HeaderValue::from_str("application/www-form-url-encoded").unwrap());
+            req.header(
+                CONTENT_TYPE,
+                HeaderValue::from_str("application/www-form-url-encoded").unwrap(),
+            );
             let mut enc = ::url::form_urlencoded::Serializer::new("".to_owned());
             for (k, v) in self.form_params.iter() {
                 enc.append_pair(&k.as_str(), v);
             }
             req.body(hyper::Body::from(enc.finish()))
         } else if let Some(body) = self.serialized_body {
-                req.header(CONTENT_TYPE, "application/json");
-                req.header(CONTENT_LENGTH, body.len() as u64);
-                req.body(hyper::Body::from(body))
+            req.header(CONTENT_TYPE, "application/json");
+            req.header(CONTENT_LENGTH, body.len() as u64);
+            req.body(hyper::Body::from(body))
         } else {
             req.body(hyper::Body::empty())
-        }.unwrap();
+        }
+        .unwrap();
 
         let no_ret_type = self.no_return_type;
-        let res = conf.client
+        let res = conf
+            .client
             .request(request)
             .map_err(|e| Error::from(e))
             .and_then(|resp| {
@@ -212,22 +225,19 @@ impl Request {
                 }
             });
 
-        Box::new(
-            res
-                .and_then(move |body| {
-                    let parsed: Result<U, _> = if no_ret_type {
-                        // This is a hack; if there's no_ret_type, U is (), but serde_json gives an
-                        // error when deserializing "" into (), so deserialize 'null' into it
-                        // instead.
-                        // An alternate option would be to require U: Default, and then return
-                        // U::default() here instead since () implements that, but then we'd
-                        // need to impl default for all models.
-                        serde_json::from_str("null")
-                    } else {
-                        serde_json::from_slice(&body)
-                    };
-                    parsed.map_err(|e| Error::from(e))
-                })
-        )
+        Box::new(res.and_then(move |body| {
+            let parsed: Result<U, _> = if no_ret_type {
+                // This is a hack; if there's no_ret_type, U is (), but serde_json gives an
+                // error when deserializing "" into (), so deserialize 'null' into it
+                // instead.
+                // An alternate option would be to require U: Default, and then return
+                // U::default() here instead since () implements that, but then we'd
+                // need to impl default for all models.
+                serde_json::from_str("null")
+            } else {
+                serde_json::from_slice(&body)
+            };
+            parsed.map_err(|e| Error::from(e))
+        }))
     }
 }
