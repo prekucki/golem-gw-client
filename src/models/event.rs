@@ -14,7 +14,7 @@ use serde_json::Value;
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Event {
     #[serde(rename = "eventId")]
-    event_id: String,
+    event_id: i64,
     #[serde(rename = "task")]
     task: Option<::models::Task>,
     #[serde(rename = "subtask")]
@@ -26,9 +26,9 @@ pub struct Event {
 }
 
 impl Event {
-    pub fn new(event_id: String) -> Event {
+    pub fn new(event_id: i64) -> Event {
         Event {
-            event_id: event_id,
+            event_id,
             task: None,
             subtask: None,
             resource: None,
@@ -36,17 +36,17 @@ impl Event {
         }
     }
 
-    pub fn set_event_id(&mut self, event_id: String) {
+    pub fn set_event_id(&mut self, event_id: i64) {
         self.event_id = event_id;
     }
 
-    pub fn with_event_id(mut self, event_id: String) -> Event {
+    pub fn with_event_id(mut self, event_id: i64) -> Event {
         self.event_id = event_id;
         self
     }
 
-    pub fn event_id(&self) -> &String {
-        &self.event_id
+    pub fn event_id(&self) -> i64 {
+        self.event_id
     }
 
     pub fn set_task(&mut self, task: ::models::Task) {
