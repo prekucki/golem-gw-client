@@ -27,6 +27,9 @@ pub struct Subtask {
     deadline: i32,
     #[serde(rename = "dockerImages")]
     docker_images: Option<Vec<::models::SubtaskDockerImages>>,
+
+    #[serde(rename = "extraData")]
+    extra_data: serde_json::Value,
 }
 
 impl Subtask {
