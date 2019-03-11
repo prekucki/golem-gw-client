@@ -41,6 +41,7 @@ impl Subtask {
             price: price,
             deadline: deadline,
             docker_images: None,
+            extra_data: serde_json::Value::Null,
         }
     }
 
