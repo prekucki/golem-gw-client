@@ -116,4 +116,8 @@ impl Subtask {
     pub fn reset_docker_images(&mut self) {
         self.docker_images = None;
     }
+
+    pub fn extra_data(&self) -> &serde_json::Value {
+        &self.extra_data
+    }
 }
