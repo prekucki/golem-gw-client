@@ -19,9 +19,9 @@ pub struct Subtask {
     task_id: String,
     #[serde(rename = "subtaskId")]
     subtask_id: String,
-    /// total subtask price in 10e-18 GNT computed as `task_max_price * subtask_timeout`
-    #[serde(rename = "price")]
-    price: i64,
+    /// total subtask price in GNT computed as `task_max_price * subtask_timeout`
+    #[serde(rename = "priceGnt")]
+    price_gnt: f64,
     /// timestamp when computation must be finished to be accepted by a requestor
     #[serde(rename = "deadline")]
     deadline: i32,
@@ -34,11 +34,11 @@ pub struct Subtask {
 
 impl Subtask {
     /// Subtask is a part of task supossed to be executed by a provider, which submited task computation willingness.
-    pub fn new(task_id: String, subtask_id: String, price: i64, deadline: i32) -> Subtask {
+    pub fn new(task_id: String, subtask_id: String, price_gnt: f64, deadline: i32) -> Subtask {
         Subtask {
             task_id: task_id,
             subtask_id: subtask_id,
-            price: price,
+            price_gnt: price_gnt,
             deadline: deadline,
             docker_images: None,
             extra_data: serde_json::Value::Null,
@@ -71,17 +71,17 @@ impl Subtask {
         &self.subtask_id
     }
 
-    pub fn set_price(&mut self, price: i64) {
-        self.price = price;
+    pub fn set_price_gnt(&mut self, price_gnt: f64) {
+        self.price_gnt = price_gnt;
     }
 
-    pub fn with_price(mut self, price: i64) -> Subtask {
-        self.price = price;
+    pub fn with_price_gnt(mut self, price_gnt: f64) -> Subtask {
+        self.price_gnt = price_gnt;
         self
     }
 
-    pub fn price(&self) -> &i64 {
-        &self.price
+    pub fn price_gnt(&self) -> &f64 {
+        &self.price_gnt
     }
 
     pub fn set_deadline(&mut self, deadline: i32) {

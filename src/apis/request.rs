@@ -1,4 +1,6 @@
-use super::{configuration, Error};
+use std::collections::HashMap;
+use std::str::FromStr;
+
 use futures;
 use futures::{Future, Stream};
 use hyper;
@@ -6,8 +8,8 @@ use hyper::header::{HeaderMap, HeaderName, HeaderValue};
 use hyper::header::{AUTHORIZATION, CONTENT_LENGTH, CONTENT_TYPE, USER_AGENT};
 use serde;
 use serde_json;
-use std::collections::HashMap;
-use std::str::FromStr;
+
+use super::{configuration, Error};
 
 pub(crate) struct ApiKey {
     pub in_header: bool,

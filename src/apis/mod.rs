@@ -3,6 +3,8 @@ use hyper;
 use serde;
 use serde_json;
 
+pub use self::default_api::{DefaultApi, DefaultApiClient};
+
 #[derive(Debug, Fail)]
 pub enum Error<T: std::fmt::Debug + Send + Sync + 'static> {
     #[fail(display = "invalid uri {}", _0)]
@@ -60,13 +62,8 @@ impl<T: std::fmt::Debug + Send + Sync> From<serde_json::Error> for Error<T> {
     }
 }
 
-use super::models::*;
-
 mod request;
 
 mod default_api;
-pub use self::default_api::{DefaultApi, DefaultApiClient};
-use std::fmt::Debug;
-
 pub mod client;
 pub mod configuration;

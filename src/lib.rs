@@ -7,7 +7,6 @@ extern crate hyper;
 extern crate serde;
 extern crate serde_json;
 extern crate url;
-#[macro_use]
 extern crate failure;
 
 pub mod apis;

@@ -28,9 +28,9 @@ pub struct Task {
     resource_size: Option<i64>,
     #[serde(rename = "estimatedMemory")]
     estimated_memory: Option<i64>,
-    /// in 10e-18 GNT per second of computation
-    #[serde(rename = "maxPrice")]
-    max_price: i64,
+    /// in GNT per second of computation
+    #[serde(rename = "maxPriceGnt")]
+    max_price_gnt: f64,
     /// minimal Golem version
     #[serde(rename = "minVersion")]
     min_version: Option<String>,
@@ -43,7 +43,7 @@ impl Task {
         deadline: i32,
         subtask_timeout: i64,
         subtasks_count: i64,
-        max_price: i64,
+        max_price_gnt: f64,
     ) -> Task {
         Task {
             task_id: task_id,
@@ -52,7 +52,7 @@ impl Task {
             subtasks_count: subtasks_count,
             resource_size: None,
             estimated_memory: None,
-            max_price: max_price,
+            max_price_gnt: max_price_gnt,
             min_version: None,
         }
     }
@@ -143,17 +143,17 @@ impl Task {
         self.estimated_memory = None;
     }
 
-    pub fn set_max_price(&mut self, max_price: i64) {
-        self.max_price = max_price;
+    pub fn set_max_price_gnt(&mut self, max_price_gnt: f64) {
+        self.max_price_gnt = max_price_gnt;
     }
 
-    pub fn with_max_price(mut self, max_price: i64) -> Task {
-        self.max_price = max_price;
+    pub fn with_max_price_gnt(mut self, max_price_gnt: f64) -> Task {
+        self.max_price_gnt = max_price_gnt;
         self
     }
 
-    pub fn max_price(&self) -> &i64 {
-        &self.max_price
+    pub fn max_price_gnt(&self) -> &f64 {
+        &self.max_price_gnt
     }
 
     pub fn set_min_version(&mut self, min_version: String) {

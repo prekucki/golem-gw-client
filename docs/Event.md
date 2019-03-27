@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**event_id** | **String** |  | 
+**event_id** | **i64** |  | 
 **task** | [***::models::Task**](Task.md) |  | [optional] 
 **subtask** | [***::models::Subtask**](Subtask.md) |  | [optional] 
 **resource** | [***::models::Resource**](Resource.md) |  | [optional] 

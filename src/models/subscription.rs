@@ -15,9 +15,9 @@ use serde_json::Value;
 pub struct Subscription {
     #[serde(rename = "name")]
     name: Option<String>,
-    /// minimal accepted price in 10e-18 GNT
-    #[serde(rename = "minPrice")]
-    min_price: i32,
+    /// minimal accepted price in GNT
+    #[serde(rename = "minPriceGnt")]
+    min_price_gnt: f64,
     #[serde(rename = "performance")]
     performance: Option<f32>,
     #[serde(rename = "maxCpuCores")]
@@ -35,14 +35,14 @@ pub struct Subscription {
 
 impl Subscription {
     pub fn new(
-        min_price: i32,
+        min_price_gnt: f64,
         max_cpu_cores: i32,
         max_memory_size: i32,
         max_disk_size: i32,
     ) -> Subscription {
         Subscription {
             name: None,
-            min_price: min_price,
+            min_price_gnt: min_price_gnt,
             performance: None,
             max_cpu_cores: max_cpu_cores,
             max_memory_size: max_memory_size,
@@ -68,17 +68,17 @@ impl Subscription {
         self.name = None;
     }
 
-    pub fn set_min_price(&mut self, min_price: i32) {
-        self.min_price = min_price;
+    pub fn set_min_price_gnt(&mut self, min_price_gnt: f64) {
+        self.min_price_gnt = min_price_gnt;
     }
 
-    pub fn with_min_price(mut self, min_price: i32) -> Subscription {
-        self.min_price = min_price;
+    pub fn with_min_price_gnt(mut self, min_price_gnt: f64) -> Subscription {
+        self.min_price_gnt = min_price_gnt;
         self
     }
 
-    pub fn min_price(&self) -> &i32 {
-        &self.min_price
+    pub fn min_price_gnt(&self) -> &f64 {
+        &self.min_price_gnt
     }
 
     pub fn set_performance(&mut self, performance: f32) {
