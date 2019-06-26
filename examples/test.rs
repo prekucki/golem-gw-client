@@ -17,7 +17,7 @@ fn main() {
     let config = golem_gw_api::apis::configuration::Configuration::new(client);
     let client = golem_gw_api::apis::client::APIClient::new(config);
     let subscription =
-        golem_gw_api::models::Subscription::new(1, 5, 1000666, 1000000).with_performance(12.0);
+        golem_gw_api::models::Subscription::new(1.0, 5, 1000666, 1000000).with_performance(12.0);
 
     // Subscribe
     let work = client

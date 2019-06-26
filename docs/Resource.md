@@ -3,7 +3,7 @@
 ## Properties
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
-**task_id** | **String** |  | 
+**res_id** | **String** |  | 
 **subtask_id** | **String** |  | 
 **path** | **String** |  | 
 

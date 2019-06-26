@@ -7,7 +7,6 @@ Name | Type | Description | Notes
 **deadline** | **i32** | timestamp when computation must be finished to be accepted by a requestor  | 
 **subtask_timeout** | **i64** |  | 
 **subtasks_count** | **i64** |  | 
-**resource_size** | **i64** |  | [optional] 
 **estimated_memory** | **i64** |  | [optional] 
 **max_price_gnt** | **f64** | in GNT per second of computation | 
 **min_version** | **String** | minimal Golem version | [optional] 
