@@ -48,8 +48,8 @@ impl Event {
     self
   }
 
-  pub fn event_id(&self) -> &i64 {
-    &self.event_id
+  pub fn event_id(&self) -> i64 {
+    self.event_id
   }
 
 
