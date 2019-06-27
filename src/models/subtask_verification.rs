@@ -13,7 +13,7 @@
 #[allow(unused_imports)]
 use serde_json::Value;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubtaskVerification {
   #[serde(rename = "taskId")]
   task_id: String,

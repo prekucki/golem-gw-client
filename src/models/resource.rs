@@ -13,7 +13,7 @@
 #[allow(unused_imports)]
 use serde_json::Value;
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Resource {
   #[serde(rename = "resId")]
   res_id: String,
