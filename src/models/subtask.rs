@@ -28,7 +28,7 @@ pub struct Subtask {
   #[serde(rename = "dockerImages")]
   docker_images: Option<Vec<::models::SubtaskDockerImages>>,
   #[serde(rename = "extraData")]
-  extra_data: Option<::std::collections::HashMap<String, String>>
+  extra_data: serde_json::Value
 }
 
 impl Subtask {
@@ -40,7 +40,7 @@ impl Subtask {
       price_gnt: price_gnt,
       deadline: deadline,
       docker_images: None,
-      extra_data: None
+      extra_data: serde_json::Value::Null
     }
   }
 
@@ -117,21 +117,21 @@ impl Subtask {
     self.docker_images = None;
   }
 
-  pub fn set_extra_data(&mut self, extra_data: ::std::collections::HashMap<String, String>) {
-    self.extra_data = Some(extra_data);
+  pub fn set_extra_data(&mut self, extra_data: serde_json::Value) {
+    self.extra_data = extra_data;
   }
 
-  pub fn with_extra_data(mut self, extra_data: ::std::collections::HashMap<String, String>) -> Subtask {
-    self.extra_data = Some(extra_data);
+  pub fn with_extra_data(mut self, extra_data: serde_json::Value) -> Subtask {
+    self.extra_data = extra_data;
     self
   }
 
-  pub fn extra_data(&self) -> Option<&::std::collections::HashMap<String, String>> {
-    self.extra_data.as_ref()
+  pub fn extra_data(&self) -> &serde_json::Value {
+    &self.extra_data
   }
 
   pub fn reset_extra_data(&mut self) {
-    self.extra_data = None;
+    self.extra_data = serde_json::Value::Null;
   }
 
 }
